@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Risk Assessment Framework{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <h1>🛡️ Risk Assessment Framework</h1>
+                    <p>Cybersecurity Risk Management Tool</p>
+                </div>
+                <nav>
+                    <a href="{{ url_for('index') }}" class="nav-link">📊 Dashboard</a>
+                    <a href="{{ url_for('assets') }}" class="nav-link">📦 Assets</a>
+                    <a href="{{ url_for('assess') }}" class="nav-link">🔍 Assess Risk</a>
+                    <a href="{{ url_for('report') }}" class="nav-link">📈 Report</a>
+                    <a href="{{ url_for('compliance_overview') }}" class="nav-link">📋 Compliance</a>  <!-- ADD THIS -->
+                </nav>
+            </div>
+        </header>
+
+        <main>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            {{ message }}
+                            <button onclick="this.parentElement.style.display='none'" class="close-btn">&times;</button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </main>
+
+        <footer>
+            <p>Risk Assessment Framework v1.0 | Built with Flask & SQLAlchemy</p>
+        </footer>
+    </div>
+</body>
+</html>

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Compliance Overview - Risk Assessment Framework{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>📋 Compliance Overview</h2>
+    <p>View all compliance requirements and affected risks</p>
+</div>
+
+{% if compliance_data %}
+    {% for item in compliance_data %}
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div>
+                    <h3>{{ item.compliance.name }}</h3>
+                    <p style="color: #718096; margin: 0;">
+                        <strong>Category:</strong> {{ item.compliance.category }} | 
+                        <strong>Affected Risks:</strong> {{ item.risk_count }}
+                    </p>
+                </div>
+                <span style="background: #667eea; color: white; padding: 8px 16px; border-radius: 6px; font-weight: bold;">
+                    {{ item.risk_count }}
+                </span>
+            </div>
+            
+            <p style="margin-bottom: 12px;"><strong>Requirement:</strong> {{ item.compliance.requirement }}</p>
+            <p style="margin-bottom: 12px;"><strong>Description:</strong> {{ item.compliance.description }}</p>
+            
+            {% if item.risks %}
+                <div style="background: #f7fafc; padding: 16px; border-radius: 8px; margin-top: 12px;">
+                    <h4 style="margin-top: 0;">Affected Risks:</h4>
+                    <ul style="margin: 0;">
+                        {% for ac in item.risks %}
+                            <li>
+                                <strong>{{ ac.assessment.asset.name }}</strong> + <strong>{{ ac.assessment.threat.name }}</strong>
+                                <span class="badge badge-{{ ac.assessment.risk_level }}" style="margin-left: 8px;">
+                                    Score: {{ ac.assessment.risk_score }}
+                                </span>
+                                <a href="{{ url_for('assessment_compliance', assessment_id=ac.assessment.id) }}" 
+                                   style="margin-left: 8px; color: #667eea;">View</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
+    {% endfor %}
+{% else %}
+    <div class="empty-state">
+        <p>No compliance data available. Create some risk assessments first!</p>
+    </div>
+{% endif %}
+
+<a href="{{ url_for('index') }}" class="btn btn-secondary" style="margin-top: 20px;">Back to Dashboard</a>
+{% endblock %}

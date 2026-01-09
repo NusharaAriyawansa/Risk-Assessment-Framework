@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Assess Risk - Risk Assessment Framework{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>🔍 Conduct Risk Assessment</h2>
+    <p>Evaluate threats against your assets</p>
+</div>
+
+<div class="form-container">
+    {% if not assets %}
+        <div class="alert alert-error">
+            No assets found. <a href="{{ url_for('add_asset') }}">Add an asset first</a>
+        </div>
+    {% elif not threats %}
+        <div class="alert alert-error">
+            No threats found. Please contact administrator.
+        </div>
+    {% else %}
+        <form method="POST" action="{{ url_for('add_assessment') }}" class="form assessment-form">
+            <div class="form-group">
+                <label for="asset_id">Select Asset *</label>
+                <select id="asset_id" name="asset_id" required onchange="updateAssetInfo()">
+                    <option value="">-- Choose an asset --</option>
+                    {% for asset in assets %}
+                        <option value="{{ asset.id }}">{{ asset.name }}</option>
+                    {% endfor %}
+                </select>
+                <small id="asset-info"></small>
+            </div>
+
+            <div class="form-group">
+                <label for="threat_id">Select Threat *</label>
+                <select id="threat_id" name="threat_id" required onchange="updateThreatInfo()">
+                    <option value="">-- Choose a threat --</option>
+                    {% for threat in threats %}
+                        <option value="{{ threat.id }}">{{ threat.name }}</option>
+                    {% endfor %}
+                </select>
+                <small id="threat-info"></small>
+            </div>
+
+            <div class="slider-group">
+                <label for="likelihood">Likelihood: <strong id="likelihood-val">3</strong>/5</label>
+                <input type="range" id="likelihood" name="likelihood" min="1" max="5" value="3" 
+                       oninput="updateLikelihoodVal(this.value); updateRiskPreview()">
+                <div class="slider-labels">
+                    <span>Rare</span>
+                    <span>Unlikely</span>
+                    <span>Possible</span>
+                    <span>Likely</span>
+                    <span>Almost Certain</span>
+                </div>
+            </div>
+
+            <div class="slider-group">
+                <label for="impact">Impact: <strong id="impact-val">3</strong>/5</label>
+                <input type="range" id="impact" name="impact" min="1" max="5" value="3"
+                       oninput="updateImpactVal(this.value); updateRiskPreview()">
+                <div class="slider-labels">
+                    <span>Negligible</span>
+                    <span>Minor</span>
+                    <span>Moderate</span>
+                    <span>Major</span>
+                    <span>Catastrophic</span>
+                </div>
+            </div>
+
+            <div id="risk-preview" class="risk-preview">
+                <div class="preview-label">Risk Score Preview</div>
+                <div class="preview-score" id="preview-score">9</div>
+                <div class="preview-level" id="preview-level">MEDIUM</div>
+            </div>
+
+            <div class="form-group">
+                <label for="remediation_plan">Remediation Plan</label>
+                <textarea id="remediation_plan" name="remediation_plan" rows="3"
+                          placeholder="How will you mitigate this risk?"></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Create Assessment</button>
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    {% endif %}
+</div>
+
+<script>
+const assetData = {
+    {% for asset in assets %}
+        {{ asset.id }}: { name: '{{ asset.name }}', desc: '{{ asset.description }}' },
+    {% endfor %}
+};
+
+const threatData = {
+    {% for threat in threats %}
+        {{ threat.id }}: { name: '{{ threat.name }}', desc: '{{ threat.description }}' },
+    {% endfor %}
+};
+
+function updateAssetInfo() {
+    const select = document.getElementById('asset_id');
+    const info = document.getElementById('asset-info');
+    if (select.value && assetData[select.value]) {
+        info.textContent = assetData[select.value].desc;
+    } else {
+        info.textContent = '';
+    }
+}
+
+function updateThreatInfo() {
+    const select = document.getElementById('threat_id');
+    const info = document.getElementById('threat-info');
+    if (select.value && threatData[select.value]) {
+        info.textContent = threatData[select.value].desc;
+    } else {
+        info.textContent = '';
+    }
+}
+
+function updateLikelihoodVal(val) {
+    document.getElementById('likelihood-val').textContent = val;
+}
+
+function updateImpactVal(val) {
+    document.getElementById('impact-val').textContent = val;
+}
+
+function updateRiskPreview() {
+    const likelihood = parseInt(document.getElementById('likelihood').value);
+    const impact = parseInt(document.getElementById('impact').value);
+    const score = likelihood * impact;
+    
+    let level = 'LOW';
+    if (score >= 20) level = 'CRITICAL';
+    else if (score >= 12) level = 'HIGH';
+    else if (score >= 6) level = 'MEDIUM';
+    
+    document.getElementById('preview-score').textContent = score;
+    document.getElementById('preview-level').textContent = level;
+    document.getElementById('preview-level').className = 'preview-level preview-' + level.toLowerCase();
+}
+
+// Initialize preview
+updateRiskPreview();
+</script>
+{% endblock %}

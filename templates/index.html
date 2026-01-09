@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Risk Assessment Framework{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>📊 Risk Dashboard</h2>
+    <p>Overview of security risks across your infrastructure</p>
+</div>
+
+<!-- Summary Cards -->
+<div class="summary-grid">
+    <div class="stat-card">
+        <div class="stat-number">{{ summary.total }}</div>
+        <div class="stat-label">Total Assessments</div>
+    </div>
+    <div class="stat-card critical">
+        <div class="stat-number">{{ summary.critical }}</div>
+        <div class="stat-label">Critical Risks</div>
+    </div>
+    <div class="stat-card high">
+        <div class="stat-number">{{ summary.high }}</div>
+        <div class="stat-label">High Risks</div>
+    </div>
+    <div class="stat-card medium">
+        <div class="stat-number">{{ summary.medium }}</div>
+        <div class="stat-label">Medium Risks</div>
+    </div>
+    <div class="stat-card low">
+        <div class="stat-number">{{ summary.low }}</div>
+        <div class="stat-label">Low Risks</div>
+    </div>
+</div>
+
+<!-- Recent Assessments WITH COMPLIANCE COLUMN -->
+<div class="card">
+    <h3>🔴 Recent Risk Assessments (Top 10)</h3>
+    
+    {% if assessments %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Asset</th>
+                    <th>Threat</th>
+                    <th>Likelihood</th>
+                    <th>Impact</th>
+                    <th>Risk Score</th>
+                    <th>Level</th>
+                    <th>Compliance</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for assessment in assessments %}
+                    <tr class="risk-row-{{ assessment.risk_level }}">
+                        <td><strong>{{ assessment.asset.name }}</strong></td>
+                        <td>{{ assessment.threat.name }}</td>
+                        <td class="center">{{ assessment.likelihood }}</td>
+                        <td class="center">{{ assessment.impact }}</td>
+                        <td class="center"><strong>{{ assessment.risk_score }}</strong></td>
+                        <td>
+                            <span class="badge badge-{{ assessment.risk_level }}">
+                                {{ assessment.risk_level.upper() }}
+                            </span>
+                        </td>
+                        <!-- THIS IS THE NEW COMPLIANCE COLUMN -->
+                        <td>
+                            {% if assessment.compliance_reqs %}
+                                {% for ac in assessment.compliance_reqs[:1] %}
+                                    <span style="background: #667eea; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px;">
+                                        {{ ac.compliance.category }}
+                                    </span>
+                                {% endfor %}
+                                {% if assessment.compliance_reqs|length > 1 %}
+                                    <span style="color: #718096; font-size: 11px;">
+                                        +{{ assessment.compliance_reqs|length - 1 }} more
+                                    </span>
+                                {% endif %}
+                            {% else %}
+                                <small style="color: #cbd5e0;">None</small>
+                            {% endif %}
+                        </td>
+                        <!-- ACTION BUTTONS -->
+                        <td>
+                            <a href="{{ url_for('assessment_compliance', assessment_id=assessment.id) }}" 
+                               class="btn-small btn-primary">Compliance</a>
+                            <a href="{{ url_for('delete_assessment', assessment_id=assessment.id) }}" 
+                               class="btn-small btn-danger"
+                               onclick="return confirm('Delete this assessment?')">Delete</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="empty-state">
+            <p>No assessments yet. <a href="{{ url_for('assess') }}">Create one now!</a></p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Compliance Summary Section -->
+<div class="card">
+    <h3>📋 Compliance Status</h3>
+    <p>Track which regulations are affected by your risks:</p>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-top: 20px;">
+        <div style="background: #f7fafc; padding: 16px; border-radius: 8px; text-align: center; border-left: 4px solid #667eea;">
+            <div style="font-size: 24px; font-weight: bold; color: #667eea;">📜</div>
+            <div style="font-weight: bold;">GDPR</div>
+            <small style="color: #718096;">General Data Protection</small>
+        </div>
+        <div style="background: #f7fafc; padding: 16px; border-radius: 8px; text-align: center; border-left: 4px solid #48bb78;">
+            <div style="font-size: 24px; font-weight: bold; color: #48bb78;">🏥</div>
+            <div style="font-weight: bold;">HIPAA</div>
+            <small style="color: #718096;">Health Insurance Portability</small>
+        </div>
+        <div style="background: #f7fafc; padding: 16px; border-radius: 8px; text-align: center; border-left: 4px solid #f97316;">
+            <div style="font-size: 24px; font-weight: bold; color: #f97316;">💳</div>
+            <div style="font-weight: bold;">PCI-DSS</div>
+            <small style="color: #718096;">Payment Card Industry</small>
+        </div>
+    </div>
+    
+    <a href="{{ url_for('compliance_overview') }}" class="btn btn-primary" style="margin-top: 20px;">View Compliance Details →</a>
+</div>
+
+<!-- Risk Info -->
+<div class="card">
+    <h3>ℹ️ Risk Scoring Guide</h3>
+    <div class="guide-grid">
+        <div class="guide-item critical">
+            <strong>20-25</strong>
+            <p>CRITICAL - Immediate action required</p>
+        </div>
+        <div class="guide-item high">
+            <strong>12-19</strong>
+            <p>HIGH - Address within 2 weeks</p>
+        </div>
+        <div class="guide-item medium">
+            <strong>6-11</strong>
+            <p>MEDIUM - Plan remediation</p>
+        </div>
+        <div class="guide-item low">
+            <strong>1-5</strong>
+            <p>LOW - Monitor and improve</p>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Start Guide -->
+<div class="card">
+    <h3>🚀 Quick Start</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 16px;">
+        <div style="background: #f7fafc; padding: 16px; border-radius: 8px;">
+            <strong>1. Add Assets</strong>
+            <p style="color: #718096; font-size: 13px; margin: 8px 0;">
+                Go to Assets tab and register your IT infrastructure
+            </p>
+            <a href="{{ url_for('assets') }}" class="btn btn-primary" style="width: 100%; text-align: center;">Go to Assets</a>
+        </div>
+        <div style="background: #f7fafc; padding: 16px; border-radius: 8px;">
+            <strong>2. Create Assessments</strong>
+            <p style="color: #718096; font-size: 13px; margin: 8px 0;">
+                Assess risks by combining assets and threats
+            </p>
+            <a href="{{ url_for('assess') }}" class="btn btn-primary" style="width: 100%; text-align: center;">Create Assessment</a>
+        </div>
+        <div style="background: #f7fafc; padding: 16px; border-radius: 8px;">
+            <strong>3. Map Compliance</strong>
+            <p style="color: #718096; font-size: 13px; margin: 8px 0;">
+                Link risks to compliance requirements (GDPR, HIPAA, PCI-DSS)
+            </p>
+            <a href="{{ url_for('compliance_overview') }}" class="btn btn-primary" style="width: 100%; text-align: center;">View Compliance</a>
+        </div>
+        <div style="background: #f7fafc; padding: 16px; border-radius: 8px;">
+            <strong>4. View Report</strong>
+            <p style="color: #718096; font-size: 13px; margin: 8px 0;">
+                Analyze risks with detailed reports and visualizations
+            </p>
+            <a href="{{ url_for('report') }}" class="btn btn-primary" style="width: 100%; text-align: center;">View Report</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
