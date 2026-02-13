@@ -3,45 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Risk Assessment Framework{% endblock %}</title>
+    <title>{% block title %}GRC Risk Assessment{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="header-content">
-                <div class="logo">
-                    <h1>🛡️ Risk Assessment Framework</h1>
-                    <p>Cybersecurity Risk Management Tool</p>
-                </div>
-                <nav>
-                    <a href="{{ url_for('index') }}" class="nav-link">📊 Dashboard</a>
-                    <a href="{{ url_for('assets') }}" class="nav-link">📦 Assets</a>
-                    <a href="{{ url_for('assess') }}" class="nav-link">🔍 Assess Risk</a>
-                    <a href="{{ url_for('report') }}" class="nav-link">📈 Report</a>
-                    <a href="{{ url_for('compliance_overview') }}" class="nav-link">📋 Compliance</a>  <!-- ADD THIS -->
-                </nav>
-            </div>
-        </header>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <a href="{{ url_for('index') }}">
+                <span class="logo">🛡️</span>
+                <span class="brand-text">GRC Framework</span>
+            </a>
+        </div>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('index') }}" class="{% if request.endpoint == 'index' %}active{% endif %}">Dashboard</a></li>
+            <li class="dropdown">
+                <a href="#" class="{% if request.endpoint in ['assets', 'add_asset', 'edit_asset', 'threats', 'add_threat'] %}active{% endif %}">Assets ▾</a>
+                <ul class="dropdown-menu">
+                    <li><a href="{{ url_for('assets') }}">View Assets</a></li>
+                    <li><a href="{{ url_for('add_asset') }}">Add Asset</a></li>
+                    <li class="divider"></li>
+                    <li><a href="{{ url_for('threats') }}">Threat Catalog</a></li>
+                    <li><a href="{{ url_for('add_threat') }}">Add Threat</a></li>
+                </ul>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="{% if request.endpoint in ['assess', 'report', 'edit_assessment'] %}active{% endif %}">Risk ▾</a>
+                <ul class="dropdown-menu">
+                    <li><a href="{{ url_for('assess') }}">New Assessment</a></li>
+                    <li><a href="{{ url_for('report') }}">Risk Report</a></li>
+                </ul>
+            </li>
+            <li><a href="{{ url_for('compliance') }}" class="{% if request.endpoint in ['compliance', 'assessment_compliance'] %}active{% endif %}">Compliance</a></li>
+            <li class="dropdown">
+                <a href="#" class="{% if request.endpoint in ['policies', 'add_policy', 'view_policy', 'edit_policy'] %}active{% endif %}">Governance ▾</a>
+                <ul class="dropdown-menu">
+                    <li><a href="{{ url_for('policies') }}">Policies</a></li>
+                    <li><a href="{{ url_for('add_policy') }}">Add Policy</a></li>
+                </ul>
+            </li>
+            <li><a href="{{ url_for('audit_log') }}" class="{% if request.endpoint == 'audit_log' %}active{% endif %}">Audit Log</a></li>
+        </ul>
+    </nav>
 
-        <main>
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }}">
-                            {{ message }}
-                            <button onclick="this.parentElement.style.display='none'" class="close-btn">&times;</button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                        <button class="alert-close" onclick="this.parentElement.remove()">×</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
-            {% block content %}{% endblock %}
-        </main>
+        {% block content %}{% endblock %}
+    </main>
 
-        <footer>
-            <p>Risk Assessment Framework v1.0 | Built with Flask & SQLAlchemy</p>
-        </footer>
-    </div>
+    <footer class="footer">
+        <p>GRC Risk Assessment Framework • Built for Portfolio Demonstration</p>
+    </footer>
+
+    <script>
+        // Simple dropdown toggle for mobile
+        document.querySelectorAll('.dropdown > a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768) {
+                    e.preventDefault();
+                    link.parentElement.classList.toggle('open');
+                }
+            });
+        });
+    </script>
 </body>
 </html>

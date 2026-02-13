@@ -1,38 +1,85 @@
-{% extends "base.html" %}
-
-{% block title %}Assets - Risk Assessment Framework{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Assets - GRC Risk Assessment{% endblock %}
 
 {% block content %}
 <div class="page-header">
-    <h2>📦 Asset Management</h2>
-    <p>Manage your IT infrastructure and systems</p>
-    <a href="{{ url_for('add_asset') }}" class="btn btn-primary">➕ Add New Asset</a>
+    <div>
+        <h1>IT Assets</h1>
+        <p class="subtitle">Manage your organization's IT infrastructure inventory</p>
+    </div>
+    <a href="{{ url_for('add_asset') }}" class="btn btn-primary">+ Add Asset</a>
 </div>
 
 {% if assets %}
-    <div class="assets-grid">
-        {% for asset in assets %}
-            <div class="asset-card">
-                <div class="card-header">
-                    <h3>{{ asset.name }}</h3>
-                    <span class="criticality-{{ asset.criticality }}">{{ asset.criticality.upper() }}</span>
-                </div>
-                <div class="card-body">
-                    <p class="asset-type">{{ asset.asset_type.replace('_', ' ').title() }}</p>
-                    <p>{{ asset.description }}</p>
-                    <small><strong>Owner:</strong> {{ asset.owner or 'Unassigned' }}</small>
-                </div>
-                <div class="card-footer">
-                    <a href="{{ url_for('delete_asset', asset_id=asset.id) }}" 
-                       class="btn btn-danger"
-                       onclick="return confirm('Delete this asset?')">Delete</a>
-                </div>
-            </div>
-        {% endfor %}
+<div class="card">
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Asset Name</th>
+                    <th>Type</th>
+                    <th>Criticality</th>
+                    <th>Owner</th>
+                    <th>Assessments</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for asset in assets %}
+                <tr>
+                    <td>
+                        <strong>{{ asset.name }}</strong>
+                        {% if asset.description %}
+                        <p class="text-muted small">{{ asset.description[:80] }}{% if asset.description|length > 80 %}...{% endif %}</p>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="asset-type">
+                            {% if asset.asset_type == 'Server' %}🖥️
+                            {% elif asset.asset_type == 'Database' %}🗄️
+                            {% elif asset.asset_type == 'Application' %}📱
+                            {% elif asset.asset_type == 'Network' %}🌐
+                            {% elif asset.asset_type == 'Endpoint' %}💻
+                            {% else %}📦{% endif %}
+                            {{ asset.asset_type }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge badge-{{ asset.criticality|lower }}">{{ asset.criticality }}</span>
+                    </td>
+                    <td>{{ asset.owner or '—' }}</td>
+                    <td>
+                        <span class="count-badge">{{ asset.assessments|length }}</span>
+                    </td>
+                    <td class="actions">
+                        <a href="{{ url_for('edit_asset', id=asset.id) }}" class="btn btn-sm">Edit</a>
+                        <a href="{{ url_for('delete_asset', id=asset.id) }}" class="btn btn-sm btn-danger" 
+                           onclick="return confirm('Delete this asset and all its assessments?')">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
+</div>
 {% else %}
-    <div class="empty-state">
-        <p>No assets registered yet. <a href="{{ url_for('add_asset') }}">Add one now!</a></p>
+<div class="empty-state card">
+    <div class="card-body center">
+        <div class="empty-icon">💻</div>
+        <h3>No Assets Yet</h3>
+        <p>Start by adding your IT assets to assess their risks.</p>
+        <a href="{{ url_for('add_asset') }}" class="btn btn-primary">Add First Asset</a>
     </div>
+</div>
 {% endif %}
+
+<div class="info-box">
+    <h4>Asset Criticality Levels</h4>
+    <ul class="criticality-legend">
+        <li><span class="badge badge-critical">Critical</span> Core business systems - immediate response required</li>
+        <li><span class="badge badge-high">High</span> Important systems - address within 24 hours</li>
+        <li><span class="badge badge-medium">Medium</span> Standard systems - address within 1 week</li>
+        <li><span class="badge badge-low">Low</span> Non-critical systems - scheduled maintenance</li>
+    </ul>
+</div>
 {% endblock %}

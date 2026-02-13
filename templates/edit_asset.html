@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Edit Asset - GRC Risk Assessment{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Edit Asset</h1>
+    <p class="subtitle">Update asset information</p>
+</div>
+
+<div class="card form-card">
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('edit_asset', id=asset.id) }}">
+            <div class="form-group">
+                <label for="name">Asset Name <span class="required">*</span></label>
+                <input type="text" id="name" name="name" required value="{{ asset.name }}">
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="3">{{ asset.description or '' }}</textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="asset_type">Asset Type <span class="required">*</span></label>
+                    <select id="asset_type" name="asset_type" required>
+                        <option value="Server" {% if asset.asset_type == 'Server' %}selected{% endif %}>🖥️ Server</option>
+                        <option value="Database" {% if asset.asset_type == 'Database' %}selected{% endif %}>🗄️ Database</option>
+                        <option value="Application" {% if asset.asset_type == 'Application' %}selected{% endif %}>📱 Application</option>
+                        <option value="Network" {% if asset.asset_type == 'Network' %}selected{% endif %}>🌐 Network</option>
+                        <option value="Endpoint" {% if asset.asset_type == 'Endpoint' %}selected{% endif %}>💻 Endpoint</option>
+                        <option value="Cloud Service" {% if asset.asset_type == 'Cloud Service' %}selected{% endif %}>☁️ Cloud Service</option>
+                        <option value="IoT Device" {% if asset.asset_type == 'IoT Device' %}selected{% endif %}>📡 IoT Device</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="criticality">Criticality <span class="required">*</span></label>
+                    <select id="criticality" name="criticality" required>
+                        <option value="Critical" {% if asset.criticality == 'Critical' %}selected{% endif %}>🔴 Critical</option>
+                        <option value="High" {% if asset.criticality == 'High' %}selected{% endif %}>🟠 High</option>
+                        <option value="Medium" {% if asset.criticality == 'Medium' %}selected{% endif %}>🟡 Medium</option>
+                        <option value="Low" {% if asset.criticality == 'Low' %}selected{% endif %}>🟢 Low</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="owner">Asset Owner</label>
+                <input type="text" id="owner" name="owner" value="{{ asset.owner or '' }}">
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ url_for('assets') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

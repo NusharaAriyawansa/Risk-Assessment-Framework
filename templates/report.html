@@ -1,49 +1,96 @@
-{% extends "base.html" %}
-
-{% block title %}Risk Report - Risk Assessment Framework{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Risk Report - GRC Risk Assessment{% endblock %}
 
 {% block content %}
 <div class="page-header">
-    <h2>📈 Detailed Risk Report</h2>
-    <p>Comprehensive analysis of all security risks</p>
+    <div>
+        <h1>Risk Report</h1>
+        <p class="subtitle">Comprehensive view of all risk assessments</p>
+    </div>
+    <a href="{{ url_for('assess') }}" class="btn btn-primary">+ New Assessment</a>
 </div>
 
-{% if assessments %}
-    <!-- Risk Matrix -->
-    <div class="card">
-        <h3>Risk Matrix (Likelihood vs Impact)</h3>
-        <div class="risk-matrix">
-            <table class="matrix-table">
-                <tbody>
-                    {% for impact in [5, 4, 3, 2, 1] %}
-                        <tr>
-                            <td class="matrix-label">{{ impact }}</td>
-                            {% for likelihood in [1, 2, 3, 4, 5] %}
-                                <td class="matrix-cell matrix-score-{{ likelihood * impact }}">
-                                    <strong>{{ likelihood * impact }}</strong>
-                                    {% if matrix.get(likelihood ~ '_' ~ impact) %}
-                                        <br><small>({{ matrix[likelihood ~ '_' ~ impact]|length }})</small>
-                                    {% endif %}
-                                </td>
-                            {% endfor %}
-                        </tr>
-                    {% endfor %}
+<!-- Risk Matrix Visualization -->
+<div class="card">
+    <div class="card-header">
+        <h2>Risk Matrix</h2>
+    </div>
+    <div class="card-body">
+        <div class="risk-matrix-container">
+            <div class="matrix-label-y">Impact →</div>
+            <table class="risk-matrix interactive">
+                <thead>
                     <tr>
-                        <td></td>
-                        {% for i in range(1, 6) %}
-                            <td class="matrix-label">{{ i }}</td>
+                        <th></th>
+                        <th>1</th>
+                        <th>2</th>
+                        <th>3</th>
+                        <th>4</th>
+                        <th>5</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in range(5) %}
+                    <tr>
+                        <td class="row-label"><strong>{{ 5 - row }}</strong></td>
+                        {% for col in range(5) %}
+                        {% set score = (5 - row) * (col + 1) %}
+                        {% set level = 'critical' if score >= 20 else ('high' if score >= 12 else ('medium' if score >= 6 else 'low')) %}
+                        <td class="{{ level }}">
+                            {% if risk_matrix[row][col] > 0 %}
+                            <span class="cell-count">{{ risk_matrix[row][col] }}</span>
+                            {% endif %}
+                        </td>
                         {% endfor %}
                     </tr>
+                    {% endfor %}
                 </tbody>
             </table>
-            <p class="matrix-info">Color intensity represents risk level: Green (Low) → Yellow (Medium) → Orange (High) → Red (Critical)</p>
+            <div class="matrix-label-x">Likelihood →</div>
+        </div>
+        <div class="legend center">
+            <span class="legend-item critical">Critical (20-25)</span>
+            <span class="legend-item high">High (12-19)</span>
+            <span class="legend-item medium">Medium (6-11)</span>
+            <span class="legend-item low">Low (1-5)</span>
         </div>
     </div>
+</div>
 
-    <!-- All Assessments -->
-    <div class="card">
-        <h3>All Risk Assessments ({{ assessments|length }} total)</h3>
-        <table class="data-table">
+<!-- Risk Summary Stats -->
+<div class="stats-row">
+    {% set critical = assessments|selectattr('risk_level', 'equalto', 'Critical')|list|length %}
+    {% set high = assessments|selectattr('risk_level', 'equalto', 'High')|list|length %}
+    {% set medium = assessments|selectattr('risk_level', 'equalto', 'Medium')|list|length %}
+    {% set low = assessments|selectattr('risk_level', 'equalto', 'Low')|list|length %}
+    
+    <div class="mini-stat critical">
+        <span class="value">{{ critical }}</span>
+        <span class="label">Critical</span>
+    </div>
+    <div class="mini-stat high">
+        <span class="value">{{ high }}</span>
+        <span class="label">High</span>
+    </div>
+    <div class="mini-stat medium">
+        <span class="value">{{ medium }}</span>
+        <span class="label">Medium</span>
+    </div>
+    <div class="mini-stat low">
+        <span class="value">{{ low }}</span>
+        <span class="label">Low</span>
+    </div>
+</div>
+
+<!-- All Assessments Table -->
+<div class="card">
+    <div class="card-header">
+        <h2>All Risk Assessments</h2>
+        <span class="count-badge">{{ assessments|length }} total</span>
+    </div>
+    <div class="card-body">
+        {% if assessments %}
+        <table class="table sortable">
             <thead>
                 <tr>
                     <th>Asset</th>
@@ -52,69 +99,69 @@
                     <th>I</th>
                     <th>Score</th>
                     <th>Level</th>
-                    <th>Remediation Plan</th>
                     <th>Status</th>
+                    <th>Compliance</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for assessment in assessments %}
-                    <tr class="risk-row-{{ assessment.risk_level }}">
-                        <td><strong>{{ assessment.asset.name }}</strong></td>
-                        <td>{{ assessment.threat.name }}</td>
-                        <td class="center">{{ assessment.likelihood }}</td>
-                        <td class="center">{{ assessment.impact }}</td>
-                        <td class="center"><strong>{{ assessment.risk_score }}</strong></td>
-                        <td>
-                            <span class="badge badge-{{ assessment.risk_level }}">
-                                {{ assessment.risk_level.upper() }}
-                            </span>
-                        </td>
-                        <td>
-                            {% if assessment.remediation_plan %}
-                                {{ assessment.remediation_plan[:50] }}...
-                            {% else %}
-                                <em>No plan</em>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <span class="status-{{ assessment.remediation_status }}">
-                                {{ assessment.remediation_status.replace('_', ' ').title() }}
-                            </span>
-                        </td>
-                    </tr>
+                <tr class="risk-row {{ assessment.risk_level|lower }}">
+                    <td>
+                        <strong>{{ assessment.asset.name }}</strong>
+                        <span class="badge badge-{{ assessment.asset.criticality|lower }} small">{{ assessment.asset.criticality }}</span>
+                    </td>
+                    <td>
+                        {{ assessment.threat.name }}
+                        <span class="text-muted small">{{ assessment.threat.category }}</span>
+                    </td>
+                    <td class="center">{{ assessment.likelihood }}</td>
+                    <td class="center">{{ assessment.impact }}</td>
+                    <td class="center"><strong class="risk-score">{{ assessment.risk_score }}</strong></td>
+                    <td>
+                        <span class="badge badge-{{ assessment.risk_level|lower }}">{{ assessment.risk_level }}</span>
+                    </td>
+                    <td>
+                        <span class="status status-{{ assessment.remediation_status|lower|replace(' ', '-') }}">
+                            {{ assessment.remediation_status }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if assessment.compliance_requirements %}
+                        <span class="compliance-count" title="{{ assessment.compliance_requirements|map(attribute='regulation')|unique|join(', ') }}">
+                            {{ assessment.compliance_requirements|length }} reqs
+                        </span>
+                        {% else %}
+                        <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                    <td class="actions">
+                        <a href="{{ url_for('edit_assessment', id=assessment.id) }}" class="btn btn-sm">Edit</a>
+                        <a href="{{ url_for('assessment_compliance', id=assessment.id) }}" class="btn btn-sm btn-outline">Map</a>
+                        <a href="{{ url_for('delete_assessment', id=assessment.id) }}" class="btn btn-sm btn-danger" 
+                           onclick="return confirm('Delete this assessment?')">×</a>
+                    </td>
+                </tr>
+                {% if assessment.remediation_plan %}
+                <tr class="remediation-row">
+                    <td colspan="9">
+                        <div class="remediation-plan">
+                            <strong>Remediation:</strong> {{ assessment.remediation_plan }}
+                        </div>
+                    </td>
+                </tr>
+                {% endif %}
                 {% endfor %}
             </tbody>
         </table>
-    </div>
-
-    <!-- Risk Statistics -->
-    <div class="card">
-        <h3>Risk Statistics</h3>
-        <div class="stats-grid">
-            <div class="stat-item">
-                <strong>Total Assessments:</strong> {{ assessments|length }}
-            </div>
-            <div class="stat-item">
-                <strong>Critical Risks:</strong> {{ assessments|selectattr('risk_level', 'equalto', 'critical')|list|length }}
-            </div>
-            <div class="stat-item">
-                <strong>High Risks:</strong> {{ assessments|selectattr('risk_level', 'equalto', 'high')|list|length }}
-            </div>
-            <div class="stat-item">
-                <strong>Medium Risks:</strong> {{ assessments|selectattr('risk_level', 'equalto', 'medium')|list|length }}
-            </div>
-            <div class="stat-item">
-                <strong>Low Risks:</strong> {{ assessments|selectattr('risk_level', 'equalto', 'low')|list|length }}
-            </div>
-            <div class="stat-item">
-                <strong>Average Score:</strong> {{ "%.1f"|format(assessments|map(attribute='risk_score')|sum / assessments|length) }}
-            </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📊</div>
+            <h3>No Assessments Yet</h3>
+            <p>Start by creating your first risk assessment.</p>
+            <a href="{{ url_for('assess') }}" class="btn btn-primary">Create Assessment</a>
         </div>
+        {% endif %}
     </div>
-
-{% else %}
-    <div class="empty-state">
-        <p>No assessments yet. <a href="{{ url_for('assess') }}">Create one now!</a></p>
-    </div>
-{% endif %}
+</div>
 {% endblock %}

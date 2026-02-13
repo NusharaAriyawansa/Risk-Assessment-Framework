@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}{{ policy.name }} - GRC Risk Assessment{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>{{ policy.name }}</h1>
+        <p class="subtitle">Version {{ policy.version }}</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('edit_policy', id=policy.id) }}" class="btn btn-primary">Edit Policy</a>
+        <a href="{{ url_for('policies') }}" class="btn btn-secondary">Back to Policies</a>
+    </div>
+</div>
+
+<div class="policy-detail">
+    <div class="card">
+        <div class="card-header">
+            <h2>Policy Information</h2>
+            <span class="policy-status status-{{ policy.status|lower|replace(' ', '-') }}">{{ policy.status }}</span>
+        </div>
+        <div class="card-body">
+            <div class="policy-meta-grid">
+                <div class="meta-item">
+                    <span class="meta-label">Category</span>
+                    <span class="meta-value">
+                        {% if policy.category == 'Security' %}🔒
+                        {% elif policy.category == 'Privacy' %}🔐
+                        {% elif policy.category == 'Access Control' %}🚪
+                        {% elif policy.category == 'Incident Response' %}🚨
+                        {% else %}📋{% endif %}
+                        {{ policy.category }}
+                    </span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Owner</span>
+                    <span class="meta-value">{{ policy.owner or 'Unassigned' }}</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Version</span>
+                    <span class="meta-value">{{ policy.version }}</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Created</span>
+                    <span class="meta-value">{{ policy.created_at.strftime('%Y-%m-%d') }}</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Last Updated</span>
+                    <span class="meta-value">{{ policy.updated_at.strftime('%Y-%m-%d') }}</span>
+                </div>
+            </div>
+
+            {% if policy.description %}
+            <div class="policy-description-full">
+                <h3>Description</h3>
+                <p>{{ policy.description }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>Policy Content</h2>
+        </div>
+        <div class="card-body">
+            {% if policy.content %}
+            <div class="policy-content">
+                {{ policy.content|safe }}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <p>No content has been added to this policy yet.</p>
+                <a href="{{ url_for('edit_policy', id=policy.id) }}" class="btn btn-primary">Add Content</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

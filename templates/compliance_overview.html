@@ -1,56 +1,92 @@
-{% extends "base.html" %}
-
-{% block title %}Compliance Overview - Risk Assessment Framework{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Compliance Overview - GRC Risk Assessment{% endblock %}
 
 {% block content %}
 <div class="page-header">
-    <h2>📋 Compliance Overview</h2>
-    <p>View all compliance requirements and affected risks</p>
+    <h1>Compliance Overview</h1>
+    <p class="subtitle">View regulatory requirements and their associated risks</p>
 </div>
 
-{% if compliance_data %}
-    {% for item in compliance_data %}
-        <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <div>
-                    <h3>{{ item.compliance.name }}</h3>
-                    <p style="color: #718096; margin: 0;">
-                        <strong>Category:</strong> {{ item.compliance.category }} | 
-                        <strong>Affected Risks:</strong> {{ item.risk_count }}
-                    </p>
-                </div>
-                <span style="background: #667eea; color: white; padding: 8px 16px; border-radius: 6px; font-weight: bold;">
-                    {{ item.risk_count }}
-                </span>
-            </div>
-            
-            <p style="margin-bottom: 12px;"><strong>Requirement:</strong> {{ item.compliance.requirement }}</p>
-            <p style="margin-bottom: 12px;"><strong>Description:</strong> {{ item.compliance.description }}</p>
-            
-            {% if item.risks %}
-                <div style="background: #f7fafc; padding: 16px; border-radius: 8px; margin-top: 12px;">
-                    <h4 style="margin-top: 0;">Affected Risks:</h4>
-                    <ul style="margin: 0;">
-                        {% for ac in item.risks %}
-                            <li>
-                                <strong>{{ ac.assessment.asset.name }}</strong> + <strong>{{ ac.assessment.threat.name }}</strong>
-                                <span class="badge badge-{{ ac.assessment.risk_level }}" style="margin-left: 8px;">
-                                    Score: {{ ac.assessment.risk_score }}
-                                </span>
-                                <a href="{{ url_for('assessment_compliance', assessment_id=ac.assessment.id) }}" 
-                                   style="margin-left: 8px; color: #667eea;">View</a>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </div>
+{% for regulation, requirements in regulations.items() %}
+<div class="card regulation-card">
+    <div class="card-header regulation-header">
+        <div class="regulation-info">
+            <h2>
+                {% if regulation == 'GDPR' %}🇪🇺
+                {% elif regulation == 'HIPAA' %}🏥
+                {% elif regulation == 'PCI-DSS' %}💳
+                {% else %}📋{% endif %}
+                {{ regulation }}
+            </h2>
+            <span class="req-count">{{ requirements|length }} requirements</span>
+        </div>
+        <div class="regulation-stats">
+            {% set affected = requirements|selectattr('assessment_count', 'gt', 0)|list|length %}
+            {% if affected > 0 %}
+            <span class="stat-affected">{{ affected }} affected by risks</span>
+            {% else %}
+            <span class="stat-ok">✓ No risks mapped</span>
             {% endif %}
         </div>
-    {% endfor %}
-{% else %}
-    <div class="empty-state">
-        <p>No compliance data available. Create some risk assessments first!</p>
     </div>
-{% endif %}
+    <div class="card-body">
+        <table class="table compliance-table">
+            <thead>
+                <tr>
+                    <th>Requirement ID</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Linked Risks</th>
+                    <th>Max Risk</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in requirements %}
+                <tr class="{% if item.assessment_count > 0 %}has-risks{% endif %}">
+                    <td>
+                        <code>{{ item.requirement.requirement_id }}</code>
+                    </td>
+                    <td>
+                        <strong>{{ item.requirement.name }}</strong>
+                        {% if item.requirement.description %}
+                        <p class="text-muted small">{{ item.requirement.description[:100] }}{% if item.requirement.description|length > 100 %}...{% endif %}</p>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="category-tag">{{ item.requirement.category }}</span>
+                    </td>
+                    <td class="center">
+                        {% if item.assessment_count > 0 %}
+                        <span class="count-badge warning">{{ item.assessment_count }}</span>
+                        {% else %}
+                        <span class="count-badge success">0</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if item.max_risk_score > 0 %}
+                        <span class="badge badge-{{ item.max_risk_level|lower }}">
+                            {{ item.max_risk_score }} ({{ item.max_risk_level }})
+                        </span>
+                        {% else %}
+                        <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endfor %}
 
-<a href="{{ url_for('index') }}" class="btn btn-secondary" style="margin-top: 20px;">Back to Dashboard</a>
+<div class="info-box">
+    <h4>About Compliance Mapping</h4>
+    <p>Each risk assessment can be linked to one or more compliance requirements. This helps you understand:</p>
+    <ul>
+        <li>Which regulatory requirements are impacted by identified risks</li>
+        <li>Priority for remediation based on compliance obligations</li>
+        <li>Audit readiness and evidence collection needs</li>
+    </ul>
+    <p>To map risks to compliance requirements, go to any assessment and click "Compliance" to add mappings.</p>
+</div>
 {% endblock %}

@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}Edit Policy - GRC Risk Assessment{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Edit Policy</h1>
+    <p class="subtitle">Update policy information</p>
+</div>
+
+<div class="card form-card">
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('edit_policy', id=policy.id) }}">
+            <div class="form-group">
+                <label for="name">Policy Name <span class="required">*</span></label>
+                <input type="text" id="name" name="name" required value="{{ policy.name }}">
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="2">{{ policy.description or '' }}</textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="category">Category <span class="required">*</span></label>
+                    <select id="category" name="category" required>
+                        <option value="Security" {% if policy.category == 'Security' %}selected{% endif %}>🔒 Security</option>
+                        <option value="Privacy" {% if policy.category == 'Privacy' %}selected{% endif %}>🔐 Privacy</option>
+                        <option value="Access Control" {% if policy.category == 'Access Control' %}selected{% endif %}>🚪 Access Control</option>
+                        <option value="Incident Response" {% if policy.category == 'Incident Response' %}selected{% endif %}>🚨 Incident Response</option>
+                        <option value="Data Management" {% if policy.category == 'Data Management' %}selected{% endif %}>📊 Data Management</option>
+                        <option value="Business Continuity" {% if policy.category == 'Business Continuity' %}selected{% endif %}>🔄 Business Continuity</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <select id="status" name="status">
+                        <option value="Draft" {% if policy.status == 'Draft' %}selected{% endif %}>Draft</option>
+                        <option value="Under Review" {% if policy.status == 'Under Review' %}selected{% endif %}>Under Review</option>
+                        <option value="Active" {% if policy.status == 'Active' %}selected{% endif %}>Active</option>
+                        <option value="Retired" {% if policy.status == 'Retired' %}selected{% endif %}>Retired</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="version">Version</label>
+                    <input type="text" id="version" name="version" value="{{ policy.version }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="owner">Policy Owner</label>
+                    <input type="text" id="owner" name="owner" value="{{ policy.owner or '' }}">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="content">Policy Content</label>
+                <textarea id="content" name="content" rows="10">{{ policy.content or '' }}</textarea>
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ url_for('policies') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

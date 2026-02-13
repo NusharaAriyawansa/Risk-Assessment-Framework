@@ -1,88 +1,105 @@
-{% extends "base.html" %}
-
-{% block title %}Compliance - Risk Assessment Framework{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Compliance Mapping - GRC Risk Assessment{% endblock %}
 
 {% block content %}
 <div class="page-header">
-    <h2>📋 Compliance Mapping</h2>
-    <p>Link compliance requirements to this risk assessment</p>
+    <h1>Compliance Mapping</h1>
+    <p class="subtitle">Link regulatory requirements to this risk assessment</p>
 </div>
 
-<div class="card">
-    <h3>Risk: {{ assessment.asset.name }} + {{ assessment.threat.name }}</h3>
-    <div class="risk-summary">
-        <strong>Risk Score:</strong> {{ assessment.risk_score }} 
-        <span class="badge badge-{{ assessment.risk_level }}">{{ assessment.risk_level.upper() }}</span>
+<!-- Assessment Summary -->
+<div class="card highlight-card">
+    <div class="card-body">
+        <div class="assessment-summary">
+            <div class="summary-item">
+                <span class="label">Asset</span>
+                <span class="value">{{ assessment.asset.name }}</span>
+            </div>
+            <div class="summary-item">
+                <span class="label">Threat</span>
+                <span class="value">{{ assessment.threat.name }}</span>
+            </div>
+            <div class="summary-item">
+                <span class="label">Risk Score</span>
+                <span class="value">
+                    <span class="badge badge-{{ assessment.risk_level|lower }} large">
+                        {{ assessment.risk_score }} ({{ assessment.risk_level }})
+                    </span>
+                </span>
+            </div>
+        </div>
     </div>
 </div>
 
+<!-- Current Mappings -->
+{% if assessment.compliance_requirements %}
 <div class="card">
-    <h3>➕ Add Compliance Requirement</h3>
-    <form method="POST" class="form">
-        <div class="form-group">
-            <label for="compliance_id">Select Compliance Requirement:</label>
-            <select id="compliance_id" name="compliance_id" required>
-                <option value="">-- Choose requirement --</option>
-                {% for comp in compliances %}
-                    <option value="{{ comp.id }}">
-                        [{{ comp.category }}] {{ comp.name }} - {{ comp.requirement }}
-                    </option>
-                {% endfor %}
-            </select>
+    <div class="card-header">
+        <h2>Currently Linked Requirements</h2>
+        <span class="count-badge">{{ assessment.compliance_requirements|length }}</span>
+    </div>
+    <div class="card-body">
+        <div class="linked-requirements">
+            {% for req in assessment.compliance_requirements %}
+            <div class="linked-item">
+                <div class="linked-info">
+                    <span class="regulation-tag">{{ req.regulation }}</span>
+                    <strong>{{ req.requirement_id }}</strong> — {{ req.name }}
+                </div>
+                <a href="{{ url_for('remove_compliance_mapping', assessment_id=assessment.id, compliance_id=req.id) }}" 
+                   class="btn btn-sm btn-danger" 
+                   onclick="return confirm('Remove this mapping?')">Remove</a>
+            </div>
+            {% endfor %}
         </div>
-        <button type="submit" class="btn btn-primary">Add Requirement</button>
-    </form>
+    </div>
 </div>
+{% endif %}
 
+<!-- Add/Update Mappings -->
 <div class="card">
-    <h3>✅ Linked Compliance Requirements</h3>
-    
-    {% if assessment.compliance_reqs %}
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Category</th>
-                    <th>Name</th>
-                    <th>Requirement</th>
-                    <th>Description</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for ac in assessment.compliance_reqs %}
-                    <tr>
-                        <td>
-                            <span class="badge" style="background: #667eea; color: white; padding: 4px 8px; border-radius: 4px;">
-                                {{ ac.compliance.category }}
-                            </span>
-                        </td>
-                        <td><strong>{{ ac.compliance.name }}</strong></td>
-                        <td>{{ ac.compliance.requirement }}</td>
-                        <td>{{ ac.compliance.description }}</td>
-                        <td>
-                            <a href="{{ url_for('remove_compliance', assessment_id=assessment.id, compliance_id=ac.compliance.id) }}" 
-                               class="btn-small btn-danger"
-                               onclick="return confirm('Remove this requirement?')">Remove</a>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p class="empty-state">No compliance requirements linked yet. Add one above!</p>
-    {% endif %}
+    <div class="card-header">
+        <h2>Select Compliance Requirements</h2>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('assessment_compliance', id=assessment.id) }}">
+            {% set current_regulation = None %}
+            {% for req in requirements %}
+                {% if req.regulation != current_regulation %}
+                    {% if current_regulation is not none %}
+                        </div></div>
+                    {% endif %}
+                    {% set current_regulation = req.regulation %}
+                    <div class="regulation-group">
+                        <h3 class="regulation-title">
+                            {% if req.regulation == 'GDPR' %}🇪🇺
+                            {% elif req.regulation == 'HIPAA' %}🏥
+                            {% elif req.regulation == 'PCI-DSS' %}💳
+                            {% else %}📋{% endif %}
+                            {{ req.regulation }}
+                        </h3>
+                        <div class="requirements-list">
+                {% endif %}
+                
+                <label class="checkbox-item {% if req.id in linked_ids %}checked{% endif %}">
+                    <input type="checkbox" name="compliance_ids" value="{{ req.id }}"
+                           {% if req.id in linked_ids %}checked{% endif %}>
+                    <span class="checkbox-content">
+                        <strong>{{ req.requirement_id }}</strong>
+                        <span class="req-name">{{ req.name }}</span>
+                        <span class="req-category">{{ req.category }}</span>
+                    </span>
+                </label>
+            {% endfor %}
+            {% if requirements %}
+                </div></div>
+            {% endif %}
+            
+            <div class="form-actions">
+                <a href="{{ url_for('edit_assessment', id=assessment.id) }}" class="btn btn-secondary">Back to Assessment</a>
+                <button type="submit" class="btn btn-primary">Save Mappings</button>
+            </div>
+        </form>
+    </div>
 </div>
-
-<div class="card">
-    <h3>ℹ️ Why This Matters</h3>
-    <p>Linking compliance requirements to risks helps you:</p>
-    <ul style="margin-left: 20px;">
-        <li>Show regulators that you assessed compliance risks</li>
-        <li>Prioritize fixes based on regulatory requirements</li>
-        <li>Track which regulations each risk affects</li>
-        <li>Demonstrate security governance</li>
-    </ul>
-</div>
-
-<a href="{{ url_for('index') }}" class="btn btn-secondary" style="margin-top: 20px;">Back to Dashboard</a>
 {% endblock %}

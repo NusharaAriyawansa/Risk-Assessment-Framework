@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}Audit Log - GRC Risk Assessment{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Audit Log</h1>
+    <p class="subtitle">Track all changes for accountability and compliance</p>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2>Recent Activity</h2>
+        <span class="count-badge">{{ logs|length }} entries</span>
+    </div>
+    <div class="card-body">
+        {% if logs %}
+        <table class="table audit-table">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Action</th>
+                    <th>Entity Type</th>
+                    <th>Entity Name</th>
+                    <th>User</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td class="timestamp">
+                        {{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}
+                    </td>
+                    <td>
+                        <span class="action-badge action-{{ log.action|lower }}">
+                            {% if log.action == 'Created' %}➕
+                            {% elif log.action == 'Updated' %}✏️
+                            {% elif log.action == 'Deleted' %}🗑️
+                            {% else %}📝{% endif %}
+                            {{ log.action }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="entity-type">{{ log.entity_type }}</span>
+                    </td>
+                    <td>
+                        <strong>{{ log.entity_name }}</strong>
+                    </td>
+                    <td>{{ log.user }}</td>
+                    <td class="details-cell">
+                        {{ log.details or '—' }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <h3>No Audit Entries</h3>
+            <p>Activity will be logged as you use the system.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="info-box">
+    <h4>About the Audit Log</h4>
+    <p>The audit log automatically records all create, update, and delete actions performed in the system. This provides:</p>
+    <ul>
+        <li><strong>Accountability</strong> — Track who made what changes and when</li>
+        <li><strong>Compliance</strong> — Maintain records for regulatory audits</li>
+        <li><strong>Forensics</strong> — Investigate incidents and trace changes</li>
+    </ul>
+</div>
+{% endblock %}

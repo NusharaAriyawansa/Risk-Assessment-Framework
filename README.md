@@ -1,192 +1,202 @@
-# Risk Assessment Framework
-A lightweight cybersecurity risk assessment tool that helps organizations:
-- Identify and prioritize security risks
-- 🎯 Quantify risks using Likelihood × Impact methodology
-- 📋 Map risks to compliance requirements
-- 📈 Track security posture over time
-## Key Features
+# GRC Risk Assessment Framework
 
-**Asset Management** - Add and track IT infrastructure
-**Risk Assessment** - Evaluate threats using Likelihood × Impact scoring
-**Risk Dashboard** - View summary statistics and recent assessments
-**Compliance Mapping** - Link risks to GDPR, HIPAA, PCI-DSS requirements
-**Compliance Overview** - See which regulations are affected by which risks
-**Risk Report** - Detailed analysis with risk matrix visualization
-**Simple & Fast** - No build process, no npm, just Python
+A comprehensive Governance, Risk, and Compliance (GRC) tool built with Python Flask that helps organizations identify, assess, and manage cybersecurity risks.
 
-## Tech Stack
-- **Python 3.8+**
-- **Flask** - Web framework
-- **SQLAlchemy** - Database ORM
-- **SQLite** - Database
-- **HTML/CSS** - Frontend
+## 🎯 Key Features
 
-## Quick Start
+### Risk Management
+- **Asset Management** — Track IT infrastructure (servers, databases, applications, networks)
+- **Threat Catalog** — Maintain a library of security threats
+- **Risk Assessment** — Evaluate threats using Likelihood × Impact methodology (1-25 scale)
+- **Risk Matrix** — Visual heatmap showing risk distribution
+- **Remediation Tracking** — Track open, in-progress, and closed remediation efforts
 
-### 1. Setup (2 minutes)
+### Compliance
+- **Regulatory Mapping** — Link risks to GDPR, HIPAA, PCI-DSS requirements
+- **Compliance Overview** — See which regulations are affected by identified risks
+- **Requirement Tracking** — Monitor 11 pre-loaded compliance requirements
 
-```bash
-# Create project directory
-mkdir risk-assessment && cd risk-assessment
+### Governance
+- **Policy Management** — Create and manage organizational policies
+- **Policy Categories** — Security, Privacy, Access Control, Incident Response
+- **Version Control** — Track policy versions and ownership
+- **Policy Lifecycle** — Draft → Under Review → Active → Retired
 
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+### Audit & Accountability
+- **Audit Log** — Automatic tracking of all create, update, delete actions
+- **Timestamps** — Full audit trail for compliance evidence
+- **User Attribution** — Track who made changes
 
-# Install dependencies
-pip install -r requirements.txt
-```
+## 📊 Risk Scoring
 
-### 2. Run (1 minute)
-
-```bash
-# Activate virtual environment (if not already)
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# Start the app
-python app.py
-```
-
-Visit `http://localhost:5000` in your browser
-
-### Done! 
-The app loads with:
-- 6 IT assets
-- 8 security threats
-- 11 compliance requirements (GDPR, HIPAA, PCI-DSS)
-- Sample assessments ready to explore
-
-## Usage Workflow
-
-### 1. Dashboard
-View all risks at a glance:
-- Total assessments count
-- Critical/High/Medium/Low breakdown
-- Recent risk assessments
-- Compliance status overview
-
-### 2. Manage Assets 
-Add/delete IT infrastructure:
-- Web servers
-- Databases
-- Payment gateways
-- Applications
-- Email systems
-
-### 3. Create Risk Assessment 
-Evaluate threats:
-1. Select asset (e.g., Database)
-2. Select threat (e.g., SQL Injection)
-3. Rate likelihood (1-5)
-4. Rate impact (1-5)
-5. Risk score auto-calculates
-6. Add remediation plan
-
-### 4. Map to Compliance 
-Link risks to regulations:
-1. Click "Compliance" on assessment
-2. Select which regulations are affected
-3. View all linked requirements
-
-### 5. View Compliance Overview 
-See regulatory landscape:
-- All compliance requirements
-- Which risks affect each regulation
-- Affected risk scores
-- Category breakdown (GDPR/HIPAA/PCI-DSS)
-
-### 6. View Report 
-Detailed risk analysis:
-- All assessments sorted by risk
-- Risk matrix visualization
-- Risk statistics
-
-## Risk Formula
 ```
 Risk Score = Likelihood (1-5) × Impact (1-5)
 
-Scoring:
+Levels:
 - 20-25: CRITICAL (fix immediately)
-- 12-19: HIGH (fix within 2 weeks)
+- 12-19: HIGH (fix within 2 weeks)  
 - 6-11:  MEDIUM (plan remediation)
 - 1-5:   LOW (monitor)
 ```
 
-## Project Structure
+## 🛠️ Tech Stack
+
+- **Python 3.8+**
+- **Flask** — Web framework
+- **Flask-SQLAlchemy** — Database ORM
+- **SQLite** — Database
+- **HTML/CSS** — Frontend (no JavaScript frameworks required)
+
+## 🚀 Quick Start
+
+### 1. Clone or Download
+```bash
+mkdir risk-assessment && cd risk-assessment
+# Copy all project files here
 ```
-.
-├── app.py                          # Main Flask app (450+ lines)
+
+### 2. Create Virtual Environment
+```bash
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+```
+
+### 3. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Run the Application
+```bash
+python app.py
+```
+
+### 5. Open in Browser
+Visit `http://localhost:5000`
+
+The app loads with sample data:
+- 6 IT assets
+- 8 security threats
+- 11 compliance requirements (GDPR, HIPAA, PCI-DSS)
+- 5 governance policies
+- 8 sample risk assessments
+
+## 📁 Project Structure
+
+```
+risk-assessment/
+├── app.py                          # Main Flask application
 ├── requirements.txt                # Python dependencies
 ├── README.md                       # This file
-├── QUICKSTART.md                   # Quick setup guide
 ├── static/
-│   └── style.css                  # Complete styling (700+ lines)
+│   └── style.css                  # Complete styling
 ├── templates/
 │   ├── base.html                  # Navigation & layout
-│   ├── index.html                 # Dashboard (with compliance)
+│   ├── index.html                 # Dashboard
 │   ├── assets.html                # Asset list
-│   ├── add_asset.html             # Asset form
-│   ├── assess.html                # Assessment form
-│   ├── report.html                # Risk report
-│   ├── assessment_compliance.html  # Map compliance to risk
-│   ├── compliance_overview.html    # View all compliance reqs
+│   ├── add_asset.html             # Add asset form
+│   ├── edit_asset.html            # Edit asset form
+│   ├── threats.html               # Threat catalog
+│   ├── add_threat.html            # Add threat form
+│   ├── assess.html                # Risk assessment form
+│   ├── edit_assessment.html       # Edit assessment form
+│   ├── report.html                # Risk report with matrix
+│   ├── compliance_overview.html   # Compliance dashboard
+│   ├── assessment_compliance.html # Map risks to compliance
+│   ├── policies.html              # Policy list
+│   ├── add_policy.html            # Add policy form
+│   ├── edit_policy.html           # Edit policy form
+│   ├── view_policy.html           # Policy detail view
+│   ├── audit_log.html             # Audit trail
 │   └── 404.html                   # Error page
 └── instance/
     └── risk.db                    # SQLite database (auto-created)
 ```
 
-## Routes
+## 🔗 Routes
 
-### Main Routes
-- `GET /` - Dashboard with summary
-- `GET /assets` - List all assets
-- `GET /asset/add` - Add asset form
-- `POST /asset/add` - Create asset
-- `GET /asset/delete/<id>` - Delete asset
-- `GET /assess` - Assessment form
-- `POST /assessment/add` - Create assessment
-- `GET /assessment/delete/<id>` - Delete assessment
-- `GET /report` - Detailed risk report
+### Dashboard
+- `GET /` — Main dashboard with summary statistics
 
-### Compliance Routes (NEW)
-- `GET /compliance` - Compliance overview
-- `GET /assessment/<id>/compliance` - View compliance mappings
-- `POST /assessment/<id>/compliance` - Add compliance mapping
-- `GET /assessment/<id>/compliance/remove/<compliance_id>` - Remove mapping
+### Assets
+- `GET /assets` — List all assets
+- `GET /asset/add` — Add asset form
+- `POST /asset/add` — Create asset
+- `GET /asset/edit/<id>` — Edit asset form
+- `POST /asset/edit/<id>` — Update asset
+- `GET /asset/delete/<id>` — Delete asset
 
-## Example: SQL Injection Risk
-```
-Asset: Customer Database (Critical)
-Threat: SQL Injection (Technical)
+### Threats
+- `GET /threats` — Threat catalog
+- `GET /threat/add` — Add threat form
+- `POST /threat/add` — Create threat
+- `GET /threat/delete/<id>` — Delete threat
 
-Assessment:
-- Likelihood: 4/5 (Attackers target databases)
-- Impact: 5/5 (Complete data exposure)
-- Risk Score: 4 × 5 = 20
-- Risk Level: CRITICAL ⚠️
+### Risk Assessments
+- `GET /assess` — Assessment form
+- `POST /assessment/add` — Create assessment
+- `GET /assessment/edit/<id>` — Edit assessment form
+- `POST /assessment/edit/<id>` — Update assessment
+- `GET /assessment/delete/<id>` — Delete assessment
+- `GET /report` — Detailed risk report
 
-Compliance Affected:
-✓ GDPR Article 32 - Data Security
-✓ GDPR Article 33 - Breach Notification
-✓ HIPAA Security Rule - Access Controls
-✓ PCI-DSS 3 - Encryption
+### Compliance
+- `GET /compliance` — Compliance overview
+- `GET /assessment/<id>/compliance` — View/manage compliance mappings
+- `POST /assessment/<id>/compliance` — Update compliance mappings
+- `GET /assessment/<id>/compliance/remove/<compliance_id>` — Remove mapping
 
-Action: Fix immediately - violates multiple regulations
-```
+### Governance
+- `GET /policies` — Policy list
+- `GET /policy/add` — Add policy form
+- `POST /policy/add` — Create policy
+- `GET /policy/view/<id>` — View policy details
+- `GET /policy/edit/<id>` — Edit policy form
+- `POST /policy/edit/<id>` — Update policy
+- `GET /policy/delete/<id>` — Delete policy
 
-## Example: Weak Passwords
-```
-Asset: Email System (High)
-Threat: Weak Passwords (Human)
+### Audit
+- `GET /audit` — View audit log
 
-Assessment:
-- Likelihood: 3/5 (Common)
-- Impact: 2/5 (Limited access)
-- Risk Score: 3 × 2 = 6
-- Risk Level: MEDIUM 🟡
+## 💼 Portfolio Demonstration
 
-Compliance Affected:
-✓ PCI-DSS 2 - Passwords
-✓ HIPAA Security Rule - Access Controls
+This project demonstrates skills in:
 
-Action: Train employees on password policy
+1. **GRC Framework Understanding**
+   - Risk assessment methodology
+   - Compliance mapping
+   - Policy lifecycle management
+
+2. **Web Development**
+   - Python Flask backend
+   - SQLAlchemy ORM
+   - Responsive HTML/CSS frontend
+
+3. **Database Design**
+   - Relational data modeling
+   - Many-to-many relationships
+   - Audit logging
+
+4. **Security Concepts**
+   - Threat categorization
+   - Risk quantification
+   - Regulatory requirements (GDPR, HIPAA, PCI-DSS)
+
+## 📈 Extending the Project
+
+Ideas for enhancement:
+- Add user authentication
+- Export reports to PDF
+- Email notifications for overdue remediations
+- Risk trend charts over time
+- API endpoints for integration
+- Role-based access control
+- Document attachment support
+
+## 📄 License
+
+MIT License — Free for personal and commercial use.
+
+---
+
+Built as a portfolio project demonstrating GRC knowledge and full-stack development skills.

@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Threat Catalog - GRC Risk Assessment{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Threat Catalog</h1>
+        <p class="subtitle">Security threats that could affect your organization</p>
+    </div>
+    <a href="{{ url_for('add_threat') }}" class="btn btn-primary">+ Add Threat</a>
+</div>
+
+{% if threats %}
+<div class="card">
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Threat Name</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Assessments</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for threat in threats %}
+                <tr>
+                    <td>
+                        <strong>{{ threat.name }}</strong>
+                    </td>
+                    <td>
+                        <span class="category-tag category-{{ threat.category|lower }}">
+                            {% if threat.category == 'Technical' %}💻
+                            {% elif threat.category == 'Human' %}👤
+                            {% elif threat.category == 'Environmental' %}🌍
+                            {% elif threat.category == 'Process' %}⚙️
+                            {% else %}📋{% endif %}
+                            {{ threat.category }}
+                        </span>
+                    </td>
+                    <td class="description-cell">
+                        {{ threat.description or '—' }}
+                    </td>
+                    <td>
+                        <span class="count-badge">{{ threat.assessments|length }}</span>
+                    </td>
+                    <td class="actions">
+                        <a href="{{ url_for('delete_threat', id=threat.id) }}" class="btn btn-sm btn-danger" 
+                           onclick="return confirm('Delete this threat? This will affect {{ threat.assessments|length }} assessment(s).')">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="empty-state card">
+    <div class="card-body center">
+        <div class="empty-icon">⚠️</div>
+        <h3>No Threats Defined</h3>
+        <p>Add threats to your catalog to start assessing risks.</p>
+        <a href="{{ url_for('add_threat') }}" class="btn btn-primary">Add First Threat</a>
+    </div>
+</div>
+{% endif %}
+
+<div class="info-box">
+    <h4>Threat Categories</h4>
+    <ul class="category-legend">
+        <li>💻 <strong>Technical</strong> — Cyber attacks, malware, system vulnerabilities</li>
+        <li>👤 <strong>Human</strong> — Phishing, social engineering, insider threats</li>
+        <li>🌍 <strong>Environmental</strong> — Natural disasters, power outages, physical security</li>
+        <li>⚙️ <strong>Process</strong> — Policy failures, procedural gaps, compliance issues</li>
+    </ul>
+</div>
+{% endblock %}

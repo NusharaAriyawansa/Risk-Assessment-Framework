@@ -1,61 +1,65 @@
-{% extends "base.html" %}
-
-{% block title %}Add Asset - Risk Assessment Framework{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Add Asset - GRC Risk Assessment{% endblock %}
 
 {% block content %}
 <div class="page-header">
-    <h2>➕ Add New Asset</h2>
-    <p>Register an IT asset for security assessment</p>
+    <h1>Add New Asset</h1>
+    <p class="subtitle">Register a new IT asset for risk assessment</p>
 </div>
 
-<div class="form-container">
-    <form method="POST" class="form">
-        <div class="form-group">
-            <label for="name">Asset Name *</label>
-            <input type="text" id="name" name="name" required 
-                   placeholder="e.g., Customer Database">
-        </div>
+<div class="card form-card">
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('add_asset') }}">
+            <div class="form-group">
+                <label for="name">Asset Name <span class="required">*</span></label>
+                <input type="text" id="name" name="name" required 
+                       placeholder="e.g., Customer Database, Web Server">
+            </div>
 
-        <div class="form-group">
-            <label for="description">Description</label>
-            <textarea id="description" name="description" rows="3"
-                      placeholder="Describe this asset..."></textarea>
-        </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="3"
+                          placeholder="Brief description of the asset and its purpose"></textarea>
+            </div>
 
-        <div class="form-group">
-            <label for="asset_type">Asset Type *</label>
-            <select id="asset_type" name="asset_type" required>
-                <option value="">-- Select Type --</option>
-                <option value="server">Web Server</option>
-                <option value="database">Database</option>
-                <option value="payment">Payment Gateway</option>
-                <option value="application">Application</option>
-                <option value="cloud">Cloud Service</option>
-                <option value="network">Network</option>
-                <option value="other">Other</option>
-            </select>
-        </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="asset_type">Asset Type <span class="required">*</span></label>
+                    <select id="asset_type" name="asset_type" required>
+                        <option value="">Select type...</option>
+                        <option value="Server">🖥️ Server</option>
+                        <option value="Database">🗄️ Database</option>
+                        <option value="Application">📱 Application</option>
+                        <option value="Network">🌐 Network</option>
+                        <option value="Endpoint">💻 Endpoint</option>
+                        <option value="Cloud Service">☁️ Cloud Service</option>
+                        <option value="IoT Device">📡 IoT Device</option>
+                    </select>
+                </div>
 
-        <div class="form-group">
-            <label for="criticality">Criticality Level *</label>
-            <select id="criticality" name="criticality" required>
-                <option value="low">Low</option>
-                <option value="medium" selected>Medium</option>
-                <option value="high">High</option>
-                <option value="critical">Critical</option>
-            </select>
-        </div>
+                <div class="form-group">
+                    <label for="criticality">Criticality <span class="required">*</span></label>
+                    <select id="criticality" name="criticality" required>
+                        <option value="">Select level...</option>
+                        <option value="Critical">🔴 Critical</option>
+                        <option value="High">🟠 High</option>
+                        <option value="Medium">🟡 Medium</option>
+                        <option value="Low">🟢 Low</option>
+                    </select>
+                </div>
+            </div>
 
-        <div class="form-group">
-            <label for="owner">Owner/Team</label>
-            <input type="text" id="owner" name="owner" 
-                   placeholder="e.g., DevOps Team">
-        </div>
+            <div class="form-group">
+                <label for="owner">Asset Owner</label>
+                <input type="text" id="owner" name="owner" 
+                       placeholder="e.g., IT Operations, Database Team">
+            </div>
 
-        <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Add Asset</button>
-            <a href="{{ url_for('assets') }}" class="btn btn-secondary">Cancel</a>
-        </div>
-    </form>
+            <div class="form-actions">
+                <a href="{{ url_for('assets') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Add Asset</button>
+            </div>
+        </form>
+    </div>
 </div>
 {% endblock %}
